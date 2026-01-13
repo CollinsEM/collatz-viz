@@ -1,0 +1,160 @@
+<!--
+Copyright (c) 2026 Eric Collins
+Licensed under the BSD 3-Clause License.
+See LICENSE file in the project root for full license information.
+-->
+
+<!-- HTML entry page for visualizing Collatz sequences -->
+<html>
+  <head lang="en">
+    <meta charset="utf-8">
+    <title>Visualization of the Collatz hierarchy</title>
+    <style>
+      /* Remove default bullets */
+      ul {
+          list-style-type: none;
+          font-family: "monospace";
+      }
+
+      /* Remove margins and padding from the parent ul */
+      #root {
+          margin: 0;
+          padding: 0;
+          cursor: pointer;
+          user-select: none; /* Prevent text selection */
+      }
+
+      /* Remove the caret/arrow in collapsable lists */
+      /* li { */
+      /*     cursor: pointer; */
+      /*     user-select: none; /\* Prevent text selection *\/ */
+      /* } */
+
+      /* Create the caret/arrow with a unicode, and style it */
+      .caret::before {
+          /* content: "\25B6"; */
+          color: black;
+          display: inline-block;
+          margin-right: 6px;
+      }
+
+      /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+      .caret-down::before {
+          transform: rotate(90deg);
+      }
+
+      /* Hide the nested list */
+      .nested {
+          display: none;
+      }
+
+      /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+      .active {
+          display: block;
+      } 
+    </style>
+  </head>
+  <body>
+    <h2>Visualization of Collatz hierarchy</h2>
+    <p>This table shows the binary representations of the only the odd
+      numbers in the Collatz hierarchy. The first column holds the
+      values that will generate a power of two, which will then
+      collapse directly to one (i.e. they are the penultimate values
+      in the Collatz sequence before it reaches 1).  Nested columns
+      will generate values that collapse back down to the parent node
+      as the next odd value in the Collatz sequence.</p>
+    <p><b>Usage:</b> Hover over nodes to see their decimal (base-10)
+      values. Click on a node to open/close it. Shift-click on a node
+      to add more child nodes. Shift-clicking on the root node (***)
+      will generate more values in the first column.</p>
+    <p><b>Note:</b> If a node does not open, then it is evenly
+      divisble by 3. Since no other odd values will collapse to a node
+      that is evenly divisible by 3, such nodes can only be reached by
+      multiples of 2 of that value. The node for 1 is also disabled
+      since it will just recursively generate the values in the first
+      column.</p>
+    <div id="root"></div>
+    <!-- <ul> -->
+    <!--   <li id="1" title="1">1</li> -->
+    <!-- </ul> -->
+    <script>
+      const useBinary = true;
+      const binDigits = 16;
+      // var root = document.getElementById("1");
+      // const id = '1';
+      // root.textContent = (useBinary ? dec2bin(1) : '1');
+      // root.addEventListener("click", function(e) {
+      //   // this.parentElement.querySelector(".nested").classList.toggle("active");
+      //   // this.classList.toggle("caret-down");
+      //   if (e.target.id != this.id) return;
+      //   if (this.childElementCount == 0) addChildren(this, 1);
+      //   const active = this.classList.toggle("active");
+      //   this.firstChild.nextSibling.hidden = !active;
+      // });
+      const root = document.getElementById("root");
+      root.textContent = "***";
+      addChildren(root, 1, 5);
+      root.addEventListener("click", onMouseClick, root);
+      
+      function onMouseClick(e) {
+        const y = parseInt(this.id) || 1;
+        if (e.shiftKey || !this.firstChild.nextSibling) {
+          const domText = this.firstChild;
+          if (e.target.id != this.id) return;
+          addChildren(this, y);
+        }
+        else if (e.target.id === this.id) {
+          const active = this.classList.toggle("active");
+          this.firstChild.nextSibling.hidden = !active;
+        }
+      }
+      
+      function dec2bin(num, width) {
+        if (width === undefined) width = binDigits;
+        var binString = "";
+        for (let i=1; i<=width; i++) {
+          binString += String((num>>(width-i))&1);
+        }
+        return binString;
+      }
+      
+      // Add child elements that will generate dom.id as the next odd integer.
+      function addChildren(dom, x, n) {
+        if (x === undefined) x = parseInt(dom.id);
+        if (n === undefined) n = 1;
+        if (x%3 == 0) return;
+        const ul = dom.firstChild.nextSibling || document.createElement("ul");
+        if (ul !== dom.firstChild.nextSibling) {
+          ul.class = "nested";
+          dom.appendChild(ul);
+        }
+        const m = ul.childElementCount;
+        const lo = 2*m + (x%3 == 1 ? 2 : 1);
+        const hi = lo+2*(n-1);
+        for (let i=lo; i<=hi; i+=2) {
+          let y = (Math.pow(2,i)*x-1)/3;
+          // if (dom.id == 1 && 1 == y) continue; // Don't add 1 to the list again
+          const li = document.createElement("li");
+          li.classList.toggle('active');
+          li.id = y.toString();
+          li.title = y.toString();
+          li.textContent = (useBinary ? dec2bin(y) : y.toString());
+          ul.appendChild(li);
+          if (y%3) {
+            li.addEventListener("click", onMouseClick, li);
+          }
+          // console.log(li);
+        }
+        return ul;
+      }
+      // var toggler = document.getElementsByClassName("caret");
+      // var i;
+      // for (i = 0; i < toggler.length; i++) {
+      //   toggler[i].addEventListener("click", function() {
+      //     this.parentElement.querySelector(".nested").classList.toggle("active");
+      //     this.classList.toggle("caret-down");
+      //   });
+      // }
+    </script>
+  </body>
+</html>
