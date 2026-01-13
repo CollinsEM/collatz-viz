@@ -57,22 +57,42 @@ See LICENSE file in the project root for full license information.
   <body>
     <h2>Visualization of Collatz hierarchy</h2>
     <p>This table shows the binary representations of the only the odd
-      numbers in the Collatz hierarchy. The first column holds the
-      values that will generate a power of two, which will then
-      collapse directly to one (i.e. they are the penultimate values
-      in the Collatz sequence before it reaches 1).  Nested columns
-      will generate values that collapse back down to the parent node
-      as the next odd value in the Collatz sequence.</p>
-    <p><b>Usage:</b> Hover over nodes to see their decimal (base-10)
-      values. Click on a node to open/close it. Shift-click on a node
-      to add more child nodes. Shift-clicking on the root node (***)
-      will generate more values in the first column.</p>
-    <p><b>Note:</b> If a node does not open, then it is evenly
-      divisble by 3. Since no other odd values will collapse to a node
-      that is evenly divisible by 3, such nodes can only be reached by
-      multiples of 2 of that value. The node for 1 is also disabled
-      since it will just recursively generate the values in the first
-      column.</p>
+      numbers in the Collatz hierarchy.</p>
+
+    <p>The first column holds the values that will generate a power of
+      two after applying the 3n+1 rule. These values will then
+      collapse directly to one. In other words, they are the
+      penultimate odd values in the Collatz sequence before it reaches
+      1. Let's refer these trunk numbers as Tier 1.</p>
+
+    <p>Clicking on a Tier 1 number will open (or close) a nested list
+      of Tier 2 odd values. These are values that produce an even
+      number from the 3n+1 rule that will collapse down to their
+      parent Tier 1 value under repeated application of the n/2
+      rule.</p>
+    
+    <h3>Usage</h3>
+    
+    <p>Hover over nodes to see their decimal (base-10) values.</p>
+    
+    <p>Click on a node to open/close it.<p>
+
+    <p>Shift-click (hold down the SHIFT key and click) on a node to
+      add more child nodes.</p>
+    
+    <p>Shift-click on the root node (***) to generate more Tier 1
+      nodes.</p>
+
+    <h3>NOTES:</h3>
+    
+    <p>If a node does not open, then it is evenly divisble by 3. Since
+      no other odd values will collapse to a node that is evenly
+      divisible by 3, such nodes can only be reached by multiples of 2
+      of that value.</p>
+    
+    <p>The node for 1 is disabled since it will just recursively
+      generate the values in the first column.</p>
+    
     <div id="root"></div>
     <!-- <ul> -->
     <!--   <li id="1" title="1">1</li> -->
@@ -133,7 +153,7 @@ See LICENSE file in the project root for full license information.
         const hi = lo+2*(n-1);
         for (let i=lo; i<=hi; i+=2) {
           let y = (Math.pow(2,i)*x-1)/3;
-          // if (dom.id == 1 && 1 == y) continue; // Don't add 1 to the list again
+          if (dom.id == 1 && 1 == y) continue; // Don't add 1 to the list again
           const li = document.createElement("li");
           li.classList.toggle('active');
           li.id = y.toString();
